@@ -1,0 +1,26 @@
+[
+  {
+    "pk": "1",
+    "model": "ess_api_backend.Department",
+    "fields": {
+      "id": "1",
+      "value": "Engineering"
+    }
+  },
+  {
+    "pk": "2",
+    "model": "ess_api_backend.Department",
+    "fields": {
+      "id": "2",
+      "value": "Product"
+    }
+  },
+  {
+    "pk": "3",
+    "model": "ess_api_backend.Department",
+    "fields": {
+      "id": "3",
+      "value": "Admin"
+    }
+  }
+]

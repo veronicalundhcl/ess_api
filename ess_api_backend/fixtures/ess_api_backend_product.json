@@ -1,0 +1,170 @@
+[
+  {
+    "pk": "1",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "1",
+      "img": "office_chair.jpg",
+      "name": "Ergonomic Office Chair",
+      "description": "Adjustable Mesh Chair",
+      "category": "Furniture",
+      "reviews": 4,
+      "price": 149.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "2",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "2",
+      "img": "keyboard.jpg",
+      "name": "Full-size Keyboard",
+      "description": "Wireless Keyboard with Numeric Keypad",
+      "category": "Peripherals",
+      "reviews": 4.5,
+      "price": 39.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "3",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "3",
+      "img": "monitor.jpeg",
+      "name": "27-inch Full HD Monitor",
+      "description": "Slim Bezel Display with HDMI Input",
+      "category": "Displays",
+      "reviews": 4.7,
+      "price": 249.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "4",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "4",
+      "img": "mouse.png",
+      "name": "Bluetooth Mouse",
+      "description": "Optical Mouse with 3 Buttons",
+      "category": "Peripherals",
+      "reviews": 4.2,
+      "price": 24.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "5",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "5",
+      "img": "desk.jpeg",
+      "name": "Adjustable Height Desk",
+      "description": "Standing Desk with Motorized Lift",
+      "category": "Furniture",
+      "reviews": 4.5,
+      "price": 499.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "6",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "6",
+      "img": "earbuds.jpg",
+      "name": "Wireless Earbuds",
+      "description": "In-ear Bluetooth Headphones",
+      "category": "Accessories",
+      "reviews": 4,
+      "price": 99.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "7",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "7",
+      "img": "laptop.jpeg",
+      "name": "14-inch Laptop",
+      "description": "Size: 14in\nChip: Intel Core i7\nMemory: 8GB\nStorage: 256 GB",
+      "category": "Computers",
+      "reviews": 4.3,
+      "price": 999.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "8",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "8",
+      "img": "24in monitor.jpeg",
+      "name": "24-inch HD Monitor",
+      "description": "Slim Bezel Display with HDMI Input",
+      "category": "Displays",
+      "reviews": 4.5,
+      "price": 149.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "9",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "9",
+      "img": "compact desk.jpeg",
+      "name": "Compact Desk",
+      "description": "Small Workspace with Keyboard Tray",
+      "category": "Furniture",
+      "reviews": 3.8,
+      "price": 79.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "10",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "10",
+      "img": "mouse2.jpg",
+      "name": "Wireless Mouse",
+      "description": "Optical Mouse with 3 Buttons",
+      "category": "Peripherals",
+      "reviews": 4,
+      "price": 19.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "11",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "11",
+      "img": "13in laptop.jpeg",
+      "name": "13-inch Laptop",
+      "description": "Size: 13in\nChip: Intel Core i5\nMemory: 8GB\nStorage: 256 GB",
+      "category": "Computers",
+      "reviews": 4.2,
+      "price": 799.99,
+      "link": ""
+    }
+  },
+  {
+    "pk": "12",
+    "model": "ess_api_backend.Product",
+    "fields": {
+      "id": "12",
+      "img": "ergo mouse.jpeg",
+      "name": "Ergonomic Wireless Mouse",
+      "description": "Adjustable DPI and 6 Buttons",
+      "category": "Peripherals",
+      "reviews": 4.3,
+      "price": 29.99,
+      "link": ""
+    }
+  }
+]

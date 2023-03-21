@@ -1,0 +1,14 @@
+[
+  {
+    "pk": "1",
+    "model": "ess_api_backend.Customer",
+    "fields": {
+      "user_id": "1",
+      "firstname": "Veronica",
+      "lastname": "Lund",
+      "dob": "2000-01-01",
+      "role": "Junior Software Developer",
+      "country": "Canada"
+    }
+  }
+]

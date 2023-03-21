@@ -1,0 +1,106 @@
+[
+  {
+    "pk": "1",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "AB",
+      "value": "Alberta"
+    }
+  },
+  {
+    "pk": "2",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "BC",
+      "value": "British Columbia"
+    }
+  },
+  {
+    "pk": "3",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "MB",
+      "value": "Manitoba"
+    }
+  },
+  {
+    "pk": "4",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "NB",
+      "value": "New Brunswick"
+    }
+  },
+  {
+    "pk": "5",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "NL",
+      "value": "Newfoundland and Labrador"
+    }
+  },
+  {
+    "pk": "6",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "NT",
+      "value": "Northwest Territories"
+    }
+  },
+  {
+    "pk": "7",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "NS",
+      "value": "Nova Scotia"
+    }
+  },
+  {
+    "pk": "8",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "NU",
+      "value": "Nunavut"
+    }
+  },
+  {
+    "pk": "9",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "ON",
+      "value": "Ontario"
+    }
+  },
+  {
+    "pk": "10",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "PE",
+      "value": "Prince Edward Island"
+    }
+  },
+  {
+    "pk": "11",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "QC",
+      "value": "Quebec"
+    }
+  },
+  {
+    "pk": "12",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "SK",
+      "value": "Saskatchewan"
+    }
+  },
+  {
+    "pk": "13",
+    "model": "ess_api_backend.Province",
+    "fields": {
+      "id": "YT",
+      "value": "Yukon"
+    }
+  }
+]

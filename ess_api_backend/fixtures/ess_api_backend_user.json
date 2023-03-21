@@ -1,0 +1,11 @@
+[
+  {
+    "pk": "1",
+    "model": "ess_api_backend.User",
+    "fields": {
+      "id": "1",
+      "username": "vlund@hcl.com",
+      "password": "password"
+    }
+  }
+]
