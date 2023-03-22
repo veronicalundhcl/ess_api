@@ -15,6 +15,10 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib import admin
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from ess_api_backend.views import (
     user_login,
@@ -31,12 +35,15 @@ from ess_api_backend.views import (
     empty_user_cart,
     place_order,
     get_province,
-    get_department
+    get_department,
+    get_orders
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/login/', user_login, name='user_login'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/logout/', user_logout, name='user_logout'),
     path('auth/token/', authenticate_token, name='authenticate_token'),
     path('profile/', get_user_profile, name='get_user_profile'),
@@ -48,6 +55,7 @@ urlpatterns = [
     path('cart/update/', update_products_to_cart, name='update_products_to_cart'),
     path('cart/delete/', delete_products_from_cart, name='delete_products_from_cart'),
     path('cart/empty/', empty_user_cart, name='empty_user_cart'),
+    path('order/', get_orders, name='get_orders'),
     path('order/place/', place_order, name='place_order'),
     path('province/', get_province, name='get_province'),
     path('department/', get_department, name='get_department'),

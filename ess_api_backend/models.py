@@ -37,14 +37,15 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=255, unique=True, default="")
+    id = models.AutoField(primary_key=True)
+    email = models.CharField(max_length=255, unique=True, default="")
     password = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = UserManager()
+    objects = models.Manager()
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'email'
 
     groups = models.ManyToManyField(
         Group,
@@ -56,6 +57,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         related_name='ess_api_backend_users'  # add a related_name here
     )
+
+    # TODO implement encryption for storing passwords
+    def check_password(self, raw_password):
+        return self.password == raw_password
 
 
 class Customer(models.Model):
@@ -88,19 +93,23 @@ class Product(models.Model):
 
 class Cart(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, to_field='id')
     quantity = models.IntegerField()
     price = models.IntegerField()
 
+    objects = models.Manager()
+
 
 class Order(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    price = models.IntegerField()
-    date_of_purchase = models.DateField(null=True)
+    user = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    order_status = models.CharField(max_length=50, null=True)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=2)
+    date_of_purchase = models.DateTimeField(null=True)
+    product_ids = models.CharField(max_length=255, null=True)
+
+    objects = models.Manager()
 
 
 class Province(models.Model):
