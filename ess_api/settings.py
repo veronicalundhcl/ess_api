@@ -24,7 +24,9 @@ SECRET_KEY = 'django-insecure-t%$04n=u^@@!geehhp=f4#go8y5189j7%p%3r1r4vc^(d99do(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+TESTS = 'ess_api_backend.tests'
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 AUTH_USER_MODEL = 'ess_api_backend.User'
 
@@ -38,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'ess_api_backend'
+    'corsheaders',
+    'ess_api_backend',
+    'kafka_modules',
 ]
 
 REST_FRAMEWORK = {
@@ -53,11 +57,32 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    # 'log_csrf_token_middleware.LogCsrfTokenMiddleware',
 ]
+
+# CSRF_COOKIE_DOMAIN = '127.0.0.1'
+# CSRF_COOKIE_AGE = None
+# CSRF_COOKIE_NAME = 'csrftoken'
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'https://localhost:3000',
+    'http://127.0.0.1:8000'
+    # Add any other origins that you want to allow requests from.
+]
+CORS_ALLOW_HEADERS = ['accept', 'accept-encoding', 'authorization', 'content-type', 'dnt', 'origin', 'user-agent',
+                      'X-CSRFToken', 'x-requested-with', ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_HEADERS = True
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', ]
 
 AUTHENTICATION_BACKENDS = [
     'ess_api_backend.backends.auth.ESSApiBackend',

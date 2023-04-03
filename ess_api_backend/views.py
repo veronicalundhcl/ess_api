@@ -1,25 +1,27 @@
 # Create your views here.
+import json
 from datetime import datetime, timedelta
 
+import django
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ValidationError
 from django.db.models import Sum
-from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods
 from django.conf import settings
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.authentication import TokenAuthentication
 import jwt
 from rest_framework.response import Response
 
+from kafka_modules.producers import send_order
 # from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Department, Order
+from .models import Department, Order, OrderProduct
 from .models import Product, Customer, User
 from .models import Province
 from .models import Cart
@@ -27,37 +29,58 @@ import logging
 
 from .serializers import CartSerializer, OrderSerializer
 
+from django.http import HttpResponse
+from django.middleware.csrf import get_token
+
+from django.http import JsonResponse
+
+# def get_csrf_token(request):
+#     response = JsonResponse({'csrftoken': get_token(request)})
+#     csrftoken = json.loads(response.content).get('csrftoken')
+#     logging.error(f'TOKEN ISSUED BY GET_TOKEN(REQUEST): {csrftoken}')
+#     response['Access-Control-Allow-Credentials'] = 'true'
+#     response['Access-Control-Allow-Origin'] = 'http://localhost:3000'
+#     return response
+from django.http import JsonResponse
+
 
 def get_csrf_token(request):
-    token = get_token(request)
-    return JsonResponse({'token': token})
+    csrf_token = django.middleware.csrf.get_token(request)
+    logging.error(f"CSRF TOKEN: {csrf_token}")
+    response = JsonResponse({'csrf_token': csrf_token})
+    response.set_cookie('csrftoken', csrf_token, httponly=True)
+    return response
+
+
+from django.http import JsonResponse
 
 
 def user_login(request):
-    logging.error(f"LOGIN REQUEST: {request}")
-    logging.error(request.POST)
-    email = request.POST['email']
-    password = request.POST['password']
+    data = json.loads(request.body)
+    email = data.get('email')
+    password = data.get('password')
+
     user = authenticate(request, email=email, password=password, backend='ess_api_backend.backends.auth.ESSApiBackend')
     if user is not None:
         login(request, user)
-        token = jwt.encode(
+        auth_token = jwt.encode(
             {'user_id': user.id, 'exp': datetime.utcnow() + timedelta(hours=24)},
             settings.SECRET_KEY,
             algorithm='HS256'
         )
-        token_str = token.decode('utf-8')  # convert token to string
-        # Redirect to a success page.
-        response = JsonResponse({'message': 'Login successful!', 'token': token_str})
-        return response
+        auth_token_str = auth_token.decode('utf-8')
+        response_data = {'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token_str}
+        return JsonResponse(response_data, status=200)
     else:
         # The user is not authenticated.
-        return HttpResponse("User does not exist")
+        response_data = {'status': 'error', 'message': 'User does not exist'}
+        return JsonResponse(response_data, status=401)
 
 
 def user_logout(request):
     logout(request)
-    return HttpResponse('Logged out successfully.')
+    response = JsonResponse({'message': 'Logged out successfully'})
+    return response
 
 
 # TODO add JWT token validation
@@ -83,9 +106,11 @@ def get_user_profile(request):
         user = User.objects.get(email=email)
         customer = Customer.objects.get(user=user)
     except User.DoesNotExist:
-        return HttpResponse("User does not exist")
+        response = JsonResponse({'error': 'User does not exist'})
+        return response
     except Customer.DoesNotExist:
-        return HttpResponse("Customer does not exist")
+        response = JsonResponse({'error': 'Customer does not exist'})
+        return response
 
     user_data = {
         'first_name': customer.firstname,
@@ -113,9 +138,11 @@ def update_user_profile(request):
         user = User.objects.get(email=email)
         customer = Customer.objects.get(user=user)
     except User.DoesNotExist:
-        return HttpResponse("User does not exist")
+        response = JsonResponse({'error': 'User does not exist'})
+        return response
     except Customer.DoesNotExist:
-        return HttpResponse("Customer does not exist")
+        response = JsonResponse({'error': 'Customer does not exist'})
+        return response
 
     # Update customer fields if they exist in request data
     if 'department' in request.data:
@@ -173,6 +200,7 @@ def get_products_from_cart(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_products_to_cart(request):
+    logging.error(f"REQUEST DATA {request.data}")
     # Get the user object from the request
     user = User.objects.get(email=request.user)
 
@@ -200,7 +228,7 @@ def add_products_to_cart(request):
             cart_item.save()
         # Otherwise, create a new cart item with the given quantity
         else:
-            Cart.objects.create(customer=customer, product_id=product, quantity=quantity, price=product.price)
+            Cart.objects.create(customer=customer, product_id=product.id, quantity=quantity, price=product.price)
 
         num_products += 1
 
@@ -263,10 +291,10 @@ def delete_products_from_cart(request):
 
             num_deleted += 1
 
-    if num_deleted > 1:
-        message = "Items successfully deleted from cart"
-    else:
+    if num_deleted == 1:
         message = "Item successfully deleted from cart"
+    else:
+        message = "Items successfully deleted from cart"
 
     # Retrieve all updated cart items for the customer
     updated_cart_items = Cart.objects.filter(customer=customer)
@@ -295,14 +323,60 @@ def empty_user_cart(request):
     return Response({'message': 'Cart successfully emptied'})
 
 
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def place_order(request):
+#     # Get the user object from the request
+#     user = User.objects.get(email=request.user)
+#
+#     # Find the corresponding customer object from the Customer table
+#     customer = get_object_or_404(Customer, user=user)
+#
+#     # Retrieve all cart items for the customer
+#     cart_items = Cart.objects.filter(customer=customer)
+#
+#     # Calculate the subtotal of the order
+#     subtotal = cart_items.aggregate(Sum('price'))['price__sum']
+#
+#     logging.error(f'CART: {cart_items}, SUBTOTAL: {subtotal}')
+#
+#     # Check that the subtotal is between 0 and 3000
+#     if not subtotal or subtotal <= 0:
+#         # raise ValidationError("Cannot place an empty order")
+#         return Response({'error': 'Cannot place an empty order'})
+#     if subtotal > 3000:
+#         # raise ValidationError("Cannot place an order totalling more than $3,000")
+#         return Response({'error': 'Cannot place an order totalling more than $3,000'})
+#
+#     # Create the order object with the user, subtotal, and current date
+#     order = Order.objects.create(
+#         user=customer,
+#         subtotal=subtotal,
+#         date_of_purchase=timezone.now(),
+#         order_status='complete'
+#     )
+#
+#     # Add the product ids from the cart items to the order
+#     product_ids = [cart_item.product_id for cart_item in cart_items]
+#     order.product_ids = product_ids
+#     order.save()
+#
+#     # Serialize the updated cart items and send them in the response
+#     cart_str = CartSerializer(cart_items, many=True).data
+#
+#     # Delete all cart items for the customer
+#     cart_items.delete()
+#
+#     # Serialize the order object and send it in the response
+#     order_serializer = OrderSerializer(order)
+#
+#     return Response({'order': order_serializer.data, 'cart': cart_str})
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def place_order(request):
-    # Get the user object from the request
-    user = User.objects.get(email=request.user)
-
-    # Find the corresponding customer object from the Customer table
-    customer = get_object_or_404(Customer, user=user)
+    # Get the customer object from the request
+    customer = get_object_or_404(Customer, user=request.user)
 
     # Retrieve all cart items for the customer
     cart_items = Cart.objects.filter(customer=customer)
@@ -314,25 +388,28 @@ def place_order(request):
 
     # Check that the subtotal is between 0 and 3000
     if not subtotal or subtotal <= 0:
-        raise ValidationError("Cannot place an empty order")
+        # raise ValidationError("Cannot place an empty order")
+        return Response({'error': 'Cannot place an empty order'})
     if subtotal > 3000:
-        raise ValidationError("Cannot place an order totalling more than $3,000")
+        # raise ValidationError("Cannot place an order totalling more than $3,000")
+        return Response({'error': 'Cannot place an order totalling more than $3,000'})
 
-    # Create the order object with the user, subtotal, and current date
+    # Create the order object with the customer, subtotal, and current date
     order = Order.objects.create(
-        user=customer,
+        customer=customer,
         subtotal=subtotal,
         date_of_purchase=timezone.now(),
         order_status='complete'
     )
 
-    # Add the product ids from the cart items to the order
-    product_ids = [cart_item.product_id for cart_item in cart_items]
-    order.product_ids = product_ids
-    order.save()
-
-    # Serialize the updated cart items and send them in the response
-    cart_str = CartSerializer(cart_items, many=True).data
+    # Create OrderProduct objects for each cart item
+    for cart_item in cart_items:
+        OrderProduct.objects.create(
+            order=order,
+            product=cart_item.product,
+            quantity=cart_item.quantity,
+            price=cart_item.price
+        )
 
     # Delete all cart items for the customer
     cart_items.delete()
@@ -340,7 +417,41 @@ def place_order(request):
     # Serialize the order object and send it in the response
     order_serializer = OrderSerializer(order)
 
-    return Response({'order': order_serializer.data, 'cart': cart_str})
+    send_order(order_serializer.data)
+
+    return Response({'order': order_serializer.data})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_inventory(request):
+    if request.method == 'POST':
+        try:
+            # Get the products and inventory updates from the request data
+            products = request.data.get('products')
+
+            # Loop through the products and update the inventory amounts in the database
+            for product in products:
+                product_id = product['id']
+                inventory = product['inventory']
+                try:
+                    product = Product.objects.get(pk=product_id)
+                    product.inventory = inventory
+                    product.save()
+                except Product.DoesNotExist:
+                    pass
+
+            # Return a success response
+            response = {'status': 'success'}
+            return JsonResponse(response)
+        except Exception as e:
+            # Return an error response if something goes wrong
+            response = {'status': 'error', 'message': str(e)}
+            return JsonResponse(response, status=400)
+    else:
+        # Return an error response for non-POST requests
+        response = {'status': 'error', 'message': 'Invalid request method'}
+        return JsonResponse(response, status=405)
 
 
 @api_view(['GET'])
@@ -353,7 +464,7 @@ def get_orders(request):
     customer = get_object_or_404(Customer, user=user)
 
     # Retrieve all orders for the customer
-    orders = Order.objects.filter(user=customer)
+    orders = Order.objects.filter(customer=customer)
 
     # Serialize the orders and send them in the response
     order_serializer = OrderSerializer(orders, many=True)

@@ -36,10 +36,12 @@ from ess_api_backend.views import (
     place_order,
     get_province,
     get_department,
-    get_orders
+    get_orders,
+    get_csrf_token
 )
 
 urlpatterns = [
+    path('csrf_token/', get_csrf_token, name='csrf_token'),
     path('admin/', admin.site.urls),
     path('auth/login/', user_login, name='user_login'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
